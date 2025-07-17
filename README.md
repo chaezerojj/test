@@ -58,9 +58,11 @@
 
 ## 이미지 걸기
 * 이미지 주소 걸기
+
 ![고양이](https://i.namu.wiki/i/IhFrc6uiSNlonNFRXzSNrKrhPKrjpmlmsB_SDg3x0PeW_L06BFuF7mOq8AcPDYjonfNpG64cQYsINU8sICeDpg.webp)
 
 * 파일 경로 걸기
+
 ![강아지](./puppy.jpg)
 
 ---
