@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>기억력 낱말카드 짝 맞추기</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f0f4f8;
+      padding: 30px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .timer {
+      margin-bottom: 20px;
+      font-size: 18px;
+      color: #555;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 120px);
+      grid-template-rows: repeat(3, 120px);
+      gap: 10px;
+    }
+
+    .card {
+      background-color: #4e73df;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: 0.3s;
+      user-select: none;
+    }
+
+    .card.flipped {
+      background-color: #fff;
+      color: #4e73df;
+      border: 2px solid #4e73df;
+    }
+
+    .card.matched {
+      background-color: #1cc88a;
+      color: white;
+      cursor: default;
+    }
+
+    .center-card {
+      background-color: #1cc88a;
+      color: white;
+      cursor: default;
+    }
+  </style>
+</head>
+<body>
+  <h1>짝 맞추기 기억력 게임</h1>
+  <div class="timer" id="timer">걸린 시간: 0초</div>
+  <div class="grid" id="cardGrid"></div>
+
+  <script>
+    const goals = [
+      "취뽀",
+      "알고리즘 실력 향상",
+      "협업 능력 향상",
+      "우수 프로젝트 선정"
+    ];
+
+    let cards = goals.flatMap(g => [g, g]); // 8개 카드
+    const centerCard = "14기 파이팅!";
+    shuffle(cards); // 무작위 섞기
+
+    const grid = document.getElementById("cardGrid");
+    let flippedCards = [];
+    let matchedCount = 0;
+    let startTime = Date.now();
+
+    const timerEl = document.getElementById("timer");
+    let timerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      timerEl.textContent = `걸린 시간: ${elapsed}초`;
+    }, 1000);
+
+    // 카드 생성
+    for (let i = 0; i < 9; i++) {
+      const card = document.createElement("div");
+      card.classList.add("card");
+
+      if (i === 4) {
+        // 중앙 고정 카드
+        card.textContent = centerCard;
+        card.classList.add("center-card");
+        card.dataset.word = centerCard;
+        card.style.pointerEvents = "none";
+      } else {
+        const word = cards.pop();
+        card.dataset.word = word;
+        card.textContent = "";
+        card.addEventListener("click", () => flipCard(card));
+      }
+
+      grid.appendChild(card);
+    }
+
+    function flipCard(card) {
+      if (card.classList.contains("flipped") || card.classList.contains("matched")) return;
+
+      card.classList.add("flipped");
+      card.textContent = card.dataset.word;
+      flippedCards.push(card);
+
+      if (flippedCards.length === 2) {
+        const [card1, card2] = flippedCards;
+        if (card1.dataset.word === card2.dataset.word) {
+          // 일치
+          card1.classList.add("matched");
+          card2.classList.add("matched");
+          flippedCards = [];
+          matchedCount++;
+
+          // 게임 종료 체크 (4쌍 모두 맞췄을 때)
+          if (matchedCount === 4) {
+            clearInterval(timerInterval);
+            setTimeout(() => {
+              const totalTime = Math.floor((Date.now() - startTime) / 1000);
+              alert(`축하합니다! 모든 카드를 맞췄어요 🎉\n총 걸린 시간: ${totalTime}초`);
+            }, 300);
+          }
+        } else {
+          // 불일치 → 1초 후 다시 뒤집기
+          setTimeout(() => {
+            card1.classList.remove("flipped");
+            card1.textContent = "";
+            card2.classList.remove("flipped");
+            card2.textContent = "";
+            flippedCards = [];
+          }, 1000);
+        }
+      }
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+  </script>
+</body>
+</html>

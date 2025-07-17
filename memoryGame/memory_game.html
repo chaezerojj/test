@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>SSAFY 기억력 게임</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f0f8ff;
+    }
+    h1 { color: #004080; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .card {
+      width: 100px;
+      height: 100px;
+      background-color: #007bff;
+      color: white;
+      font-size: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+    .flipped {
+      background-color: #ffc107;
+      color: black;
+    }
+    #timer {
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>SSAFY 기억력 게임</h1>
+<p>중앙은 "14기 파이팅"! 나머지는 목표 카드의 짝을 찾아보세요.</p>
+<div id="timer">⏱ 시간: 0초</div>
+<div class="grid" id="gameBoard"></div>
+
+<script>
+  const goals = [
+    "알고리즘 실력 향상",
+    "협업 능력 강화",
+    "프로젝트 완성도 높이기",
+    "취업 성공하기"
+  ];
+
+  const centerCard = "14기 파이팅";
+  let cards = [...goals, ...goals];
+  shuffle(cards);
+  cards.splice(4, 0, centerCard); // 가운데에 삽입
+
+  const board = document.getElementById("gameBoard");
+  let flippedCards = [];
+  let matchedCards = [];
+  let startTime = Date.now();
+  let timer = document.getElementById("timer");
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  function updateTimer() {
+    let elapsed = Math.floor((Date.now() - startTime) / 1000);
+    timer.innerText = `⏱ 시간: ${elapsed}초`;
+  }
+
+  setInterval(updateTimer, 1000);
+
+  cards.forEach((text, index) => {
+    const div = document.createElement("div");
+    div.classList.add("card");
+    div.dataset.index = index;
+    div.dataset.text = text;
+    if (text === centerCard) {
+      div.classList.add("flipped");
+      div.innerText = text;
+    }
+    div.addEventListener("click", handleCardClick);
+    board.appendChild(div);
+  });
+
+  function handleCardClick(e) {
+    const card = e.target;
+    const text = card.dataset.text;
+    const index = card.dataset.index;
+
+    if (card.classList.contains("flipped") || text === centerCard || flippedCards.length >= 2) return;
+
+    card.classList.add("flipped");
+    card.innerText = text;
+    flippedCards.push({ card, text, index });
+
+    if (flippedCards.length === 2) {
+      if (flippedCards[0].text === flippedCards[1].text) {
+        matchedCards.push(flippedCards[0].index, flippedCards[1].index);
+        flippedCards = [];
+        if (matchedCards.length === 8) {
+          setTimeout(() => {
+            const finalTime = Math.floor((Date.now() - startTime) / 1000);
+            alert(`🎉 게임 완료! 걸린 시간: ${finalTime}초`);
+          }, 500);
+        }
+      } else {
+        setTimeout(() => {
+          flippedCards.forEach(({ card }) => {
+            card.classList.remove("flipped");
+            card.innerText = "";
+          });
+          flippedCards = [];
+        }, 800);
+      }
+    }
+  }
+</script>
+
+</body>
+</html>
